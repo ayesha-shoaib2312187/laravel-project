@@ -86,27 +86,31 @@
     <section class="container py-5">
         <h2 class="fw-semibold mb-4 text-center text-primary">Featured Creations</h2>
         <div class="row">
-            @php
-                $sample = [
-                    ['id'=>1,'title'=>'Crochet Flower Bouquet','short'=>'A colorful handmade bouquet','price'=>2500,'image'=>'bouquet.png'],
-                    ['id'=>2,'title'=>'Amigurumi Bunny','short'=>'Cute crochet doll for kids','price'=>1200,'image'=>'Amigurumi Bunny.webp'],
-                    ['id'=>3,'title'=>'Boho Tote Bag','short'=>'Eco-friendly tote','price'=>2200,'image'=>'Boho bag.webp'],
-                ];
-            @endphp
-
-            @foreach($sample as $product)
-                <div class="col-md-4 mb-4">
-                    <div class="card border-0 shadow-sm h-100 text-center">
-                        <img src="{{ asset('images/' . $product['image']) }}" class="card-img-top" alt="{{ $product['title'] }}">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold text-dark">{{ $product['title'] }}</h5>
-                            <p class="text-muted small">{{ $product['short'] }}</p>
-                            <p class="fw-semibold mb-2">Rs {{ $product['price'] }}</p>
-                            <a href="{{ route('product.show', $product['id']) }}" class="btn btn-pink">View Details</a>
+            @if($products && $products->count() > 0)
+                @foreach($products as $product)
+                    <div class="col-md-4 mb-4">
+                        <div class="card border-0 shadow-sm h-100 text-center">
+                            @if($product->image)
+                                <img src="{{ asset('images/' . $product->image) }}" class="card-img-top" alt="{{ $product->title }}" style="max-height: 300px; object-fit: cover;">
+                            @else
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                                    <span class="text-muted">No Image</span>
+                                </div>
+                            @endif
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold text-dark">{{ $product->title }}</h5>
+                                <p class="text-muted small">{{ $product->short }}</p>
+                                <p class="fw-semibold mb-2">Rs {{ number_format($product->price, 2) }}</p>
+                                <a href="{{ route('product.show', $product->id) }}" class="btn btn-pink">View Details</a>
+                            </div>
                         </div>
                     </div>
+                @endforeach
+            @else
+                <div class="col-12 text-center">
+                    <p class="text-muted">No products available yet. Check back soon!</p>
                 </div>
-            @endforeach
+            @endif
         </div>
     </section>
 @endsection

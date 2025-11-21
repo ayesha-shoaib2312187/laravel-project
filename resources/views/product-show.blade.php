@@ -64,26 +64,32 @@
 
             <div class="col-md-6 text-center">
                 {{-- Left column: displays the product image, centered horizontally --}}
-                <img src="{{ asset('images/' . $product['image']) }}"
-                     class="img-fluid rounded shadow-sm"
-                     alt="{{ $product['title'] }}"
-                     style="max-height: 400px; object-fit: cover;">
+                @if($product->image)
+                    <img src="{{ asset('images/' . $product->image) }}"
+                         class="img-fluid rounded shadow-sm"
+                         alt="{{ $product->title }}"
+                         style="max-height: 400px; object-fit: cover;">
+                @else
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded shadow-sm" style="height: 400px;">
+                        <span class="text-muted">No Image Available</span>
+                    </div>
+                @endif
                 {{-- The product image is loaded from the images folder, given a max height and smooth corners --}}
             </div>
 
             <div class="col-md-6">
                 {{-- Right column: displays product title, description, price, and add-to-cart form --}}
 
-                <h2 class="fw-bold">{{ $product['title'] }}</h2>
+                <h2 class="fw-bold">{{ $product->title }}</h2>
                 {{-- Displays the product title in bold font --}}
 
-                <p class="text-muted">{{ $product['desc'] }}</p>
+                <p class="text-muted">{{ $product->desc }}</p>
                 {{-- Shows the product description in a light gray color --}}
 
-                <h4 class="text-success mb-3">PKR {{ $product['price'] }}</h4>
+                <h4 class="text-success mb-3">PKR {{ number_format($product->price, 2) }}</h4>
                 {{-- Displays the product price in green with some margin below --}}
 
-                <form action="{{ route('cart.add', $product['id']) }}" method="POST" class="mt-3">
+                <form action="{{ route('cart.add', $product->id) }}" method="POST" class="mt-3">
                     {{-- Form for adding the product to the cart. Sends a POST request to the cart.add route --}}
                     @csrf
                     {{-- CSRF token for form security --}}
@@ -133,7 +139,7 @@
                 <h5 class="fw-semibold mb-3">Write a Review</h5>
                 {{-- Heading for the review form --}}
 
-                <form action="{{ route('product.review', $product['id']) }}" method="POST">
+                <form action="{{ route('product.review', $product->id) }}" method="POST">
                     {{-- The form sends a POST request to the product.review route with the product ID --}}
                     @csrf
                     {{-- Adds CSRF protection to prevent cross-site attacks --}}

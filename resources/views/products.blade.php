@@ -76,6 +76,9 @@
                 <option value="toys">Toys</option>
                 <option value="bags">Bags</option>
                 <option value="blankets">Blankets</option>
+                <option value="cardigan">Cardigan</option>
+                <option value="beanies">Beanies</option>
+                <option value="keychains">Keychains</option>
             </select>
         </div>
 
@@ -84,29 +87,35 @@
             @foreach ($products as $product)
                 {{-- Loops through each product in the $products array or collection --}}
 
-                <div class="col-md-4 mb-4">
+                <div class="col-md-4 mb-4" data-category="{{ $product->category }}">
                     {{-- Each product occupies one-third of the row on medium and larger screens --}}
 
-                    <a href="{{ route('product.show', $product['id']) }}"
+                    <a href="{{ route('product.show', $product->id) }}"
                        class="text-decoration-none text-dark">
                         {{-- Clicking the product leads to its details page using its ID --}}
                         {{-- The text-decoration-none removes underlines, and text-dark keeps text black --}}
 
                         <div class="card border-0 shadow-sm h-100 text-center product-card">
                             {{-- Bootstrap card with no borders, light shadow, full height, and centered text --}}
-                            <img src="{{ asset('images/' . $product['image']) }}"
-                                 class="card-img-top"
-                                 style="max-height:400px"
-                                 alt="{{ $product['title'] }}">
+                            @if($product->image)
+                                <img src="{{ asset('images/' . $product->image) }}"
+                                     class="card-img-top"
+                                     style="max-height:400px; object-fit: cover;"
+                                     alt="{{ $product->title }}">
+                            @else
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                                    <span class="text-muted">No Image</span>
+                                </div>
+                            @endif
                             {{-- Loads the product image from the images folder with a height limit of 400px --}}
 
                             <div class="card-body">
                                 {{-- Contains the product title, description, and price --}}
-                                <h5 class="card-title fw-bold text-dark">{{ $product['title'] }}</h5>
+                                <h5 class="card-title fw-bold text-dark">{{ $product->title }}</h5>
                                 {{-- Displays the product name in bold --}}
-                                <p class="text-muted small">{{ $product['short'] }}</p>
+                                <p class="text-muted small">{{ $product->short }}</p>
                                 {{-- Shows a short description in lighter gray text --}}
-                                <p class="fw-semibold mb-2">Rs {{ $product['price'] }}</p>
+                                <p class="fw-semibold mb-2">Rs {{ number_format($product->price, 2) }}</p>
                                 {{-- Displays the product price in bold with a small margin below --}}
                             </div>
                         </div>
@@ -122,15 +131,18 @@
         document.getElementById('categoryFilter').addEventListener('change', function() {
             const selected = this.value; // Stores the selected category
 
-            // Goes through each product card on the page
-            document.querySelectorAll('.product-card').forEach(card => {
-                // Reads the product’s category from a data attribute (if available)
-                const category = card.closest('.col-md-4').querySelector('.product-card').dataset?.category;
+            // Goes through each product container on the page
+            document.querySelectorAll('.col-md-4[data-category]').forEach(productContainer => {
+                // Reads the product's category from the data-category attribute
+                const category = productContainer.getAttribute('data-category');
 
                 // If "All" is selected, show all products.
                 // Otherwise, show only the ones matching the selected category.
-                card.closest('.col-md-4').style.display =
-                    (selected === 'all' || category === selected) ? 'block' : 'none';
+                if (selected === 'all' || category === selected) {
+                    productContainer.style.display = 'block';
+                } else {
+                    productContainer.style.display = 'none';
+                }
             });
         });
     </script>
