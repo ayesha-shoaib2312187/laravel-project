@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Review;
 use Illuminate\Support\Facades\Session;
 
 class ProductController extends Controller
@@ -22,19 +23,30 @@ class ProductController extends Controller
         return view('products', compact('products'));
     }
 
+    public function search(Request $request)
+    {
+        $query = Product::query();
+
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->has('category') && $request->category != 'all') {
+            $query->where('category', $request->category);
+        }
+
+        $products = $query->get(['id', 'title', 'price', 'image', 'category']);
+
+        return response()->json($products);
+    }
+
     // 🔍 Single product details
     public function show($id)
     {
         $product = Product::findOrFail($id);
+        $reviews = $product->reviews()->orderBy('created_at', 'desc')->get();
 
-        // Example hardcoded reviews
-        $reviews = [
-            ['name'=>'Sara','review'=>'Absolutely love it!'],
-            ['name'=>'Ali','review'=>'High quality, perfect gift.'],
-            ['name'=>'Nadia','review'=>'The quality is so good.'],
-        ];
-
-        return view('product-show', compact('product','reviews'));
+        return view('product-show', compact('product', 'reviews'));
     }
 
     // ✍️ Store a new review
@@ -43,16 +55,32 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:100',
             'review' => 'required|string|max:500',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Future: save review to DB
+        $product = Product::findOrFail($id);
+
+        $data = [
+            'product_id' => $product->id,
+            'name' => $request->name,
+            'review' => $request->review,
+        ];
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '_review.' . $request->image->extension();
+            $request->image->move(public_path('images/reviews'), $imageName);
+            $data['image'] = $imageName;
+        }
+
+        Review::create($data);
+
         Session::flash('success', 'Thank you for your review!');
         return redirect()->back();
     }
     public function category($slug)
     {
         $products = Product::where('category', $slug)->get();
-        return view('products', compact('products','slug'));
+        return view('products', compact('products', 'slug'));
     }
 
     // === Admin CRUD ===
@@ -74,16 +102,27 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category'=>'required|string',
-            'title'=>'required|string',
-            'short'=>'required|string',
-            'desc'=>'required|string',
-            'price'=>'required|numeric',
-            'image'=>'nullable|string',
+            'category' => 'required|string',
+            'title' => 'required|string',
+            'short' => 'required|string',
+            'desc' => 'required|string',
+            'price' => 'required|numeric',
+            'stock' => 'nullable|boolean',
+            'discount' => 'nullable|numeric|min:0|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        Product::create($request->all());
-        return redirect()->route('products.index')->with('success','Product added!');
+        $data = $request->all();
+        $data['stock'] = $request->has('stock') ? 1 : 0;
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images'), $imageName);
+            $data['image'] = $imageName;
+        }
+
+        Product::create($data);
+        return redirect()->route('products.index')->with('success', 'Product added!');
     }
 
     // Show edit form
@@ -96,22 +135,33 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'category'=>'required|string',
-            'title'=>'required|string',
-            'short'=>'required|string',
-            'desc'=>'required|string',
-            'price'=>'required|numeric',
-            'image'=>'nullable|string',
+            'category' => 'required|string',
+            'title' => 'required|string',
+            'short' => 'required|string',
+            'desc' => 'required|string',
+            'price' => 'required|numeric',
+            'stock' => 'nullable|boolean',
+            'discount' => 'nullable|numeric|min:0|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $product->update($request->all());
-        return redirect()->route('products.index')->with('success','Product updated!');
+        $data = $request->all();
+        $data['stock'] = $request->has('stock') ? 1 : 0;
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images'), $imageName);
+            $data['image'] = $imageName;
+        }
+
+        $product->update($data);
+        return redirect()->route('products.index')->with('success', 'Product updated!');
     }
 
     // Delete product
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('products.index')->with('success','Product deleted!');
+        return redirect()->route('products.index')->with('success', 'Product deleted!');
     }
 }

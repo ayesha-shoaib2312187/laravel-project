@@ -15,7 +15,15 @@ class Product extends Model
         'short',
         'desc',
         'price',
+        'stock',
+        'discount',
         'image',
+    ];
+
+    protected $casts = [
+        'stock' => 'boolean',
+        'discount' => 'decimal:2',
+        'price' => 'decimal:2',
     ];
 
     public function reviews()

@@ -33,7 +33,22 @@ class CheckoutController extends Controller
             'address' => 'required|string|max:255',
         ]);
 
-        // 🧶 Optional: save order details to database (future feature)
+        $cart = session('cart', []);
+        $grandTotal = 0;
+        foreach ($cart as $item) {
+            $grandTotal += ($item['price'] ?? 0) * ($item['quantity'] ?? 1);
+        }
+
+        // Create the order
+        \App\Models\Order::create([
+            'order_number' => 'ORD-' . strtoupper(uniqid()),
+            'customer_name' => $request->name,
+            'email' => $request->email,
+            'address' => $request->address,
+            'total' => $grandTotal,
+            'status' => 'Pending',
+            'date' => now(),
+        ]);
 
         // Clear the cart after successful checkout
         session()->forget('cart');

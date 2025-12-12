@@ -350,3 +350,6 @@ The Product CRUD module is fully functional with:
 
 All changes made in the admin panel are immediately reflected on the frontend, demonstrating the dynamic nature of the module.
 
+
+
+
