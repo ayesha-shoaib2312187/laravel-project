@@ -108,8 +108,18 @@
                     </li>
                 </ul>
 
-                <!-- 3. Right: Cart -->
-                <div class="d-flex align-items-center">
+                <!-- 3. Right: Cart & Auth -->
+                <div class="d-flex align-items-center gap-3">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none text-dark fw-bold">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}" class="text-decoration-none text-dark fw-bold">
+                            Login
+                        </a>
+                    @endauth
+
                     <!-- Mobile Only Cart Link (inside collapse) -->
                     <a href="{{ route('cart') }}" class="nav-link d-lg-none mb-3">Cart</a>
 

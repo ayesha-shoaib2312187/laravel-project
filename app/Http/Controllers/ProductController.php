@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\Review;
 use Illuminate\Support\Facades\Session;
 
@@ -19,8 +20,9 @@ class ProductController extends Controller
 
     public function products()
     {
-        $products = Product::all();
-        return view('products', compact('products'));
+        $products = Product::with('category')->get();
+        $categories = Category::all();
+        return view('products', compact('products', 'categories'));
     }
 
     public function search(Request $request)
@@ -32,10 +34,21 @@ class ProductController extends Controller
         }
 
         if ($request->has('category') && $request->category != 'all') {
-            $query->where('category', $request->category);
+            // Check if it's an ID or slug? Assuming ID for now from frontend or slug
+            // But wait, the frontend sends a string currently.
+            // I should support searching by category name or ID.
+            // Let's assume frontend sends category ID if I change it, or slug.
+            // For now, let's look up category by name or slug if it's a string, or just ID.
+            $category = Category::where('name', $request->category)->orWhere('slug', $request->category)->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            } else {
+                // Fallback to old behavior string search?
+                $query->where('category', $request->category);
+            }
         }
 
-        $products = $query->get(['id', 'title', 'price', 'image', 'category']);
+        $products = $query->with('category')->get(['id', 'title', 'price', 'image', 'category_id', 'category']);
 
         return response()->json($products);
     }
@@ -95,14 +108,15 @@ class ProductController extends Controller
     // Show create form
     public function create()
     {
-        return view('admin.products.create');
+        $categories = Category::all();
+        return view('admin.products.create', compact('categories'));
     }
 
     // Store new product
     public function store(Request $request)
     {
         $request->validate([
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'title' => 'required|string',
             'short' => 'required|string',
             'desc' => 'required|string',
@@ -114,6 +128,9 @@ class ProductController extends Controller
 
         $data = $request->all();
         $data['stock'] = $request->has('stock') ? 1 : 0;
+        // Populate legacy field
+        $category = Category::find($request->category_id);
+        $data['category'] = $category ? $category->name : '';
 
         if ($request->hasFile('image')) {
             $imageName = time() . '.' . $request->image->extension();
@@ -128,14 +145,15 @@ class ProductController extends Controller
     // Show edit form
     public function edit(Product $product)
     {
-        return view('admin.products.edit', compact('product'));
+        $categories = Category::all();
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
     // Update product
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'title' => 'required|string',
             'short' => 'required|string',
             'desc' => 'required|string',
@@ -147,6 +165,9 @@ class ProductController extends Controller
 
         $data = $request->all();
         $data['stock'] = $request->has('stock') ? 1 : 0;
+        // Populate legacy field
+        $category = Category::find($request->category_id);
+        $data['category'] = $category ? $category->name : '';
 
         if ($request->hasFile('image')) {
             $imageName = time() . '.' . $request->image->extension();

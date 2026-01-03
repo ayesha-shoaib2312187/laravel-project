@@ -40,7 +40,8 @@ class CheckoutController extends Controller
         }
 
         // Create the order
-        \App\Models\Order::create([
+        $order = \App\Models\Order::create([
+            'user_id' => auth()->id(), // Nullable if guest
             'order_number' => 'ORD-' . strtoupper(uniqid()),
             'customer_name' => $request->name,
             'email' => $request->email,
@@ -49,6 +50,16 @@ class CheckoutController extends Controller
             'status' => 'Pending',
             'date' => now(),
         ]);
+
+        // Save order items
+        foreach ($cart as $id => $item) {
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $id,
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+            ]);
+        }
 
         // Clear the cart after successful checkout
         session()->forget('cart');

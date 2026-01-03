@@ -7,7 +7,10 @@ class ContactController extends Controller
 {
     public function index()
     {
-        return view('contact');
+        $contactInfo = \App\Models\ContactInfo::first();
+        // Optional: Ensure it's not null if you want to avoid errors in view,
+        // or handle null in blade. Let's send what we have.
+        return view('contact', compact('contactInfo'));
     }
 
     public function store(Request $request)

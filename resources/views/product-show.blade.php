@@ -110,6 +110,8 @@
                 <h2 class="fw-bold">{{ $product->title }}</h2>
                 {{-- Displays the product title in bold font --}}
 
+                <p class="text-pink fw-semibold mb-2">{{ $product->category->name ?? 'Uncategorized' }}</p>
+
                 <p class="text-muted">{{ $product->desc }}</p>
                 {{-- Shows the product description in a light gray color --}}
 

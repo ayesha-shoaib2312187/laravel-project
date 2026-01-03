@@ -89,13 +89,9 @@
                             <label for="categoryFilter" class="form-label fw-bold d-block">Filter by Category:</label>
                             <select id="categoryFilter" class="form-select">
                                 <option value="all">All Categories</option>
-                                <option value="Flowers">Flowers</option>
-                                <option value="toys">Toys</option>
-                                <option value="bags">Bags</option>
-                                <option value="blankets">Blankets</option>
-                                <option value="cardigan">Cardigan</option>
-                                <option value="beanies">Beanies</option>
-                                <option value="keychains">Keychains</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-8 position-relative">
@@ -115,7 +111,7 @@
             @foreach ($products as $product)
                 {{-- Loops through each product in the $products array or collection --}}
 
-                <div class="col-md-4 mb-4" data-category="{{ $product->category }}">
+                <div class="col-md-4 mb-4" data-category="{{ $product->category_id }}">
                     {{-- Each product occupies one-third of the row on medium and larger screens --}}
 
                     <a href="{{ route('product.show', $product->id) }}" class="text-decoration-none text-dark">
@@ -138,9 +134,8 @@
                             <div class="card-body">
                                 {{-- Contains the product title, description, and price --}}
                                 <h5 class="card-title fw-bold text-dark">{{ $product->title }}</h5>
-                                {{-- Displays the product name in bold --}}
+                                <p class="text-muted small mb-1">{{ $product->category->name ?? 'Uncategorized' }}</p>
                                 <p class="text-muted small">{{ $product->short }}</p>
-                                {{-- Shows a short description in lighter gray text --}}
                                 <p class="fw-semibold mb-2">Rs {{ number_format($product->price, 2) }}</p>
                                 {{-- Displays the product price in bold with a small margin below --}}
                             </div>
@@ -165,7 +160,7 @@
             // If search is empty, handle client-side filtering for the grid only
             if (query.trim() === '') {
                 searchResults.style.display = 'none';
-                
+
                 // Show grid items based on category
                 document.querySelectorAll('.col-md-4[data-category]').forEach(productContainer => {
                     const cat = productContainer.getAttribute('data-category');
@@ -188,21 +183,21 @@
                             const item = document.createElement('a');
                             item.href = `/product/${product.id}`;
                             item.className = 'list-group-item list-group-item-action d-flex align-items-center p-2';
-                            
+
                             let imgHtml = '';
-                            if(product.image) {
+                            if (product.image) {
                                 imgHtml = `<img src="/images/${product.image}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">`;
                             } else {
                                 imgHtml = `<div class="rounded me-3 d-flex align-items-center justify-content-center bg-light" style="width: 50px; height: 50px;"><small class="text-muted" style="font-size: 10px;">No Img</small></div>`;
                             }
 
                             item.innerHTML = `
-                                ${imgHtml}
-                                <div>
-                                    <div class="fw-bold text-dark">${product.title}</div>
-                                    <small class="text-muted">Rs ${parseFloat(product.price).toFixed(2)}</small>
-                                </div>
-                            `;
+                                        ${imgHtml}
+                                        <div>
+                                            <div class="fw-bold text-dark">${product.title}</div>
+                                            <small class="text-muted">Rs ${parseFloat(product.price).toFixed(2)}</small>
+                                        </div>
+                                    `;
                             searchResults.appendChild(item);
                         });
                         searchResults.style.display = 'block';
@@ -219,7 +214,7 @@
         categoryFilter.addEventListener('change', fetchProducts);
 
         // Hide dropdown when clicking outside
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.style.display = 'none';
             }

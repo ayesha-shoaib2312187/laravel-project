@@ -140,19 +140,16 @@
                     @csrf
 
                     <div class="mb-3">
-                        <label for="category" class="form-label">Category *</label>
-                        <select name="category" id="category" class="form-select" required>
+                        <label for="category_id" class="form-label">Category *</label>
+                        <select name="category_id" id="category_id" class="form-select" required>
                             <option value="">Select a category</option>
-                            <option value="Flowers" {{ old('category') == 'Flowers' ? 'selected' : '' }}>Flowers</option>
-                            <option value="toys" {{ old('category') == 'toys' ? 'selected' : '' }}>Toys</option>
-                            <option value="bags" {{ old('category') == 'bags' ? 'selected' : '' }}>Bags</option>
-                            <option value="blankets" {{ old('category') == 'blankets' ? 'selected' : '' }}>Blankets</option>
-                            <option value="cardigan" {{ old('category') == 'cardigan' ? 'selected' : '' }}>Cardigan</option>
-                            <option value="beanies" {{ old('category') == 'beanies' ? 'selected' : '' }}>Beanies</option>
-                            <option value="keychains" {{ old('category') == 'keychains' ? 'selected' : '' }}>Keychains
-                            </option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
                         </select>
-                        @error('category')
+                        @error('category_id')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>

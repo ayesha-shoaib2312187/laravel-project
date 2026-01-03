@@ -10,7 +10,8 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category',
+        'category_id',
+        'category', // Keeping for backward compatibility temporarily
         'title',
         'short',
         'desc',
@@ -19,6 +20,11 @@ class Product extends Model
         'discount',
         'image',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     protected $casts = [
         'stock' => 'boolean',

@@ -11,21 +11,62 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::orderBy('date', 'desc')->get();
+        $orders = $request->user()->orders()->orderBy('date', 'desc')->get();
         return response()->json([
             'success' => true,
             'data' => $orders
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
+    public function store(Request $request)
     {
-        $order = Order::find($id);
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'name' => 'required|string',
+            'address' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        $grandTotal = 0;
+        foreach ($request->items as $item) {
+            $product = \App\Models\Product::find($item['product_id']);
+            $grandTotal += $product->price * $item['quantity'];
+        }
+
+        $order = $request->user()->orders()->create([
+            'order_number' => 'ORD-API-' . strtoupper(uniqid()),
+            'customer_name' => $request->name,
+            'email' => $request->email,
+            'address' => $request->address,
+            'total' => $grandTotal,
+            'status' => 'Pending',
+            'date' => now(),
+        ]);
+
+        foreach ($request->items as $item) {
+            $product = \App\Models\Product::find($item['product_id']);
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'price' => $product->price,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order created successfully',
+            'data' => $order->load('items')
+        ], 201);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $order = $request->user()->orders()->with('items.product')->find($id);
 
         if (!$order) {
             return response()->json([

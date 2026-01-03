@@ -107,58 +107,104 @@
     <div class="dashboard-container">
         <div class="container">
             <div class="dashboard-card">
-                <h1 class="dashboard-title">Dashboard</h1>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="dashboard-title mb-0">Dashboard</h1>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger">
+                            Logout
+                        </button>
+                    </form>
+                </div>
                 <p class="welcome-text">Welcome back! You're logged in to Frolic Stitch.</p>
 
-                <div class="admin-section">
-                    <h3>Admin Panel</h3>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="p-3 border rounded bg-white h-100">
-                                <h5 class="fw-bold text-dark">📦 Products</h5>
-                                <p class="small text-muted mb-3">Manage inventory, prices, and product details.</p>
-                                <a href="{{ route('products.index') }}" class="btn btn-sm btn-admin w-100">Manage
-                                    Products</a>
+                @if(auth()->user()->is_admin)
+                    <div class="admin-section">
+                        <h3>Admin Panel</h3>
+
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white p-3">
+                                    <h5>Products</h5>
+                                    <h3>{{ $stats['products'] ?? 0 }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white p-3">
+                                    <h5>Categories</h5>
+                                    <h3>{{ $stats['categories'] ?? 0 }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-dark p-3">
+                                    <h5>Orders</h5>
+                                    <h3>{{ $stats['orders'] ?? 0 }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white p-3">
+                                    <h5>Users</h5>
+                                    <h3>{{ $stats['users'] ?? 0 }}</h3>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="p-3 border rounded bg-white h-100">
-                                <h5 class="fw-bold text-dark">🛒 Orders</h5>
-                                <p class="small text-muted mb-3">View orders and update their status.</p>
-                                <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-admin w-100">Manage
-                                    Orders</a>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 border rounded bg-white h-100">
+                                    <h5 class="fw-bold text-dark">📦 Products</h5>
+                                    <p class="small text-muted mb-3">Manage inventory, prices, and product details.</p>
+                                    <a href="{{ route('products.index') }}" class="btn btn-sm btn-admin w-100">Manage
+                                        Products</a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="p-3 border rounded bg-white h-100">
-                                <h5 class="fw-bold text-dark">✉️ Inbox</h5>
-                                <p class="small text-muted mb-3">Read and manage contact form messages.</p>
-                                <a href="{{ route('admin.contact-messages.index') }}"
-                                    class="btn btn-sm btn-admin w-100">View Messages</a>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 border rounded bg-white h-100">
+                                    <h5 class="fw-bold text-dark">🛒 Orders</h5>
+                                    <p class="small text-muted mb-3">View orders and update their status.</p>
+                                    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-admin w-100">Manage
+                                        Orders</a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="p-3 border rounded bg-white h-100">
-                                <h5 class="fw-bold text-dark">📜 Policies</h5>
-                                <p class="small text-muted mb-3">Edit privacy policy, terms, and other pages.</p>
-                                <a href="{{ route('admin.policies.index') }}" class="btn btn-sm btn-admin w-100">Manage
-                                    Policies</a>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 border rounded bg-white h-100">
+                                    <h5 class="fw-bold text-dark">✉️ Inbox</h5>
+                                    <p class="small text-muted mb-3">Read and manage contact form messages.</p>
+                                    <a href="{{ route('admin.contact-messages.index') }}"
+                                        class="btn btn-sm btn-admin w-100">View Messages</a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="p-3 border rounded bg-white">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5 class="fw-bold text-dark mb-1">📞 Contact Info</h5>
-                                        <p class="small text-muted mb-0">Update your store's address, phone, and email.</p>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 border rounded bg-white h-100">
+                                    <h5 class="fw-bold text-dark">📜 Policies</h5>
+                                    <p class="small text-muted mb-3">Edit privacy policy, terms, and other pages.</p>
+                                    <a href="{{ route('admin.policies.index') }}" class="btn btn-sm btn-admin w-100">Manage
+                                        Policies</a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="p-3 border rounded bg-white h-100">
+                                    <h5 class="fw-bold text-dark">📂 Categories</h5>
+                                    <p class="small text-muted mb-3">Add, edit, or delete product categories.</p>
+                                    <a href="{{ route('admin.categories.index') }}" class="btn btn-sm btn-admin w-100">Manage
+                                        Categories</a>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="p-3 border rounded bg-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="fw-bold text-dark mb-1">📞 Contact Info</h5>
+                                            <p class="small text-muted mb-0">Update your store's address, phone, and email.</p>
+                                        </div>
+                                        <a href="{{ route('admin.contactInfo.index') }}" class="btn btn-sm btn-admin">Edit
+                                            Info</a>
                                     </div>
-                                    <a href="{{ route('admin.contactInfo.index') }}" class="btn btn-sm btn-admin">Edit
-                                        Info</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @endif
 
                 <div class="quick-links">
                     <h4>Quick Links</h4>
@@ -177,6 +223,13 @@
                             👤 Edit Profile
                         </a>
                     </div>
+                    @if(!auth()->user()->is_admin)
+                        <div class="quick-link-item">
+                            <a href="{{ route('user.orders.index') }}">
+                                📦 My Orders
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

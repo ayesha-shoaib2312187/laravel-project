@@ -42,13 +42,23 @@ Route::get('/thankyou', function () {
 //  Dashboard & Admin Panel (Protected by authentication)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $stats = [
+            'products' => \App\Models\Product::count(),
+            'categories' => \App\Models\Category::count(),
+            'orders' => \App\Models\Order::count(),
+            'users' => \App\Models\User::count(),
+        ];
+        return view('dashboard', compact('stats'));
     })->name('dashboard');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // User Orders
+    Route::get('/my-orders', [App\Http\Controllers\UserOrderController::class, 'index'])->name('user.orders.index');
+    Route::get('/my-orders/{order}', [App\Http\Controllers\UserOrderController::class, 'show'])->name('user.orders.show');
 
     Route::resource('admin/products', ProductController::class)->names([
         'index' => 'products.index',
@@ -88,6 +98,16 @@ Route::middleware('auth')->group(function () {
     // Contact Information (single row, editable)
     Route::get('admin/contactInfo', [ContactInfoController::class, 'index'])->name('admin.contactInfo.index');
     Route::put('admin/contactInfo', [ContactInfoController::class, 'update'])->name('admin.contactInfo.update');
+
+    // Categories (full CRUD)
+    Route::resource('admin/categories', \App\Http\Controllers\Admin\CategoryController::class)->names([
+        'index' => 'admin.categories.index',
+        'create' => 'admin.categories.create',
+        'store' => 'admin.categories.store',
+        'edit' => 'admin.categories.edit',
+        'update' => 'admin.categories.update',
+        'destroy' => 'admin.categories.destroy',
+    ]);
 
     Route::get('/contactInfo', [ContactInfoController::class, 'index']);
 

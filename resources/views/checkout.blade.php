@@ -30,12 +30,14 @@
                         @csrf
                         <div class="mb-3">
                             <label for="name" class="form-label">Full Name</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="name" class="form-control" value="{{ auth()->user()->name ?? '' }}"
+                                required>
                         </div>
 
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <input type="email" name="email" class="form-control" value="{{ auth()->user()->email ?? '' }}"
+                                required>
                         </div>
 
                         <div class="mb-3">
@@ -51,12 +53,16 @@
     </div>
 
     <style>
-        .text-pink { color: #d63384; }
+        .text-pink {
+            color: #d63384;
+        }
+
         .btn-pink {
             background-color: #ff85c0;
             color: #fff;
             border-radius: 10px;
         }
+
         .btn-pink:hover {
             background-color: #ff4da6;
         }
